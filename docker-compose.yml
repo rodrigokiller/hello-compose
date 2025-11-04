@@ -1,0 +1,75 @@
+version: "3.9"
+
+networks:
+  web:        # rede onde o proxy e os apps conversam
+  internal:   # rede só dos apps (db isolado)
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - internal
+    # Sem "ports:" -> NÃO expõe MySQL pra internet
+
+  backend:
+    build: ./app
+    restart: always
+    environment:
+      # conexão ao MySQL interno
+      MYSQL_HOST: db
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    depends_on:
+      - db
+    networks:
+      - internal
+      - web
+    expose:
+      - "5000"   # visível APENAS na rede docker
+
+  frontend:
+    build: ./frontend
+    restart: always
+    environment:
+      # SSR (server) fala com backend pela rede docker:
+      INTERNAL_API_URL: http://backend:5000
+      # Client components (no browser) usarão rota /api do domínio:
+      NEXT_PUBLIC_API_URL: https://${DOMAIN}/api
+    depends_on:
+      - backend
+    networks:
+      - web
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN}
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - web
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:

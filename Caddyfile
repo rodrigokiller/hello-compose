@@ -1,0 +1,16 @@
+{
+  email you@exemplo.com
+}
+
+{$DOMAIN} {
+  encode gzip
+
+  @api path /api*            # tudo que começa com /api
+  handle @api {
+    reverse_proxy backend:5000
+  }
+
+  handle {                   # o resto vai pro frontend
+    reverse_proxy frontend:3000
+  }
+}
