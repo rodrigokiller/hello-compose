@@ -1,11 +1,11 @@
 from flask import Flask
+import os
 import mysql.connector
 
 app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    # Conecta no banco (usando as variáveis do container MySQL)
     conn = mysql.connector.connect(
         host=os.getenv("MYSQL_HOST"),
         user=os.getenv("MYSQL_USER"),
