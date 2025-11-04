@@ -7,10 +7,10 @@ app = Flask(__name__)
 def hello():
     # Conecta no banco (usando as variáveis do container MySQL)
     conn = mysql.connector.connect(
-        host='db',
-        user='root',
-        password='root',
-        database='teste_db'
+        host=os.getenv("MYSQL_HOST"),
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD"),
+        database=os.getenv("MYSQL_DATABASE"),
     )
     cursor = conn.cursor()
     cursor.execute("SELECT 'Conexão com MySQL via Docker funcionando!'")
