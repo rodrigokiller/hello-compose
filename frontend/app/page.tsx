@@ -8,7 +8,7 @@ export default async function Home() {
     <main style={{ padding: 24, fontFamily: 'sans-serif' }}>
       <h1>Next.js + Flask + MySQL (Docker)</h1>
       <p>Backend disse: <strong>{text}</strong></p>
-      <p><strong>Micha e Dudu</strong></p>
+      <p><strong>Arnaldo</strong></p>
     </main>
   );
 }
